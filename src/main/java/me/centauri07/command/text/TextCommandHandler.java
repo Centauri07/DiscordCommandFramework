@@ -23,6 +23,8 @@ abstract public class TextCommandHandler {
     private final RequiredArgs requiredArgs;
     @Nullable @Getter
     private final RequiredArgsRange requiredArgsRange;
+    @Getter
+    private final String group;
 
     @Getter private List<Permission> permissions = new ArrayList<>();
     @Getter private List<String> aliases = new ArrayList<>();
@@ -36,6 +38,10 @@ abstract public class TextCommandHandler {
 
         @Nullable me.centauri07.command.attributes.Permission permission = getClass().getDeclaredAnnotation(me.centauri07.command.attributes.Permission.class);
         if (permission != null) permissions = Arrays.asList(permission.permissions());
+
+        @Nullable Category categoryAnnotation = getClass().getDeclaredAnnotation(Category.class);
+        if (categoryAnnotation != null) group = categoryAnnotation.groupName().toLowerCase();
+        else group = "general";
 
         @Nullable Aliases aliasesAnnotation = getClass().getDeclaredAnnotation(Aliases.class);
         if (aliasesAnnotation != null) aliases = Arrays.asList(aliasesAnnotation.aliases());

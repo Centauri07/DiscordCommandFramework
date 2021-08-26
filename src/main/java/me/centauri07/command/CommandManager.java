@@ -23,7 +23,10 @@ import java.util.function.Consumer;
 
 public class CommandManager extends ListenerAdapter {
     @Getter
-    private final Map<String, TextCommandHandler> textCommandHandlers = new HashMap<>();
+    private final Map<String, TextCommandHandler> commands = new HashMap<>();
+
+    @Getter
+    private final Map<String, List<TextCommandHandler>> commandGroupMap = new HashMap<>();
 
     @Getter
     private final JDA jda;
@@ -38,18 +41,23 @@ public class CommandManager extends ListenerAdapter {
     }
 
     public void registerTextCommand(TextCommandHandler textCommandHandler) {
-        if (textCommandHandlers.get(textCommandHandler.getCommandInfo().name()) != null) {
+        if (commands.get(textCommandHandler.getCommandInfo().name()) != null) {
             try {
                 throw new TextCommandAlreadyExistsException("Command with name " + textCommandHandler.getCommandInfo().name() + " already exists");
             } catch (TextCommandAlreadyExistsException e) {
                 e.printStackTrace();
             }
         }
-        textCommandHandlers.put(textCommandHandler.getCommandInfo().name(), textCommandHandler);
+        commands.put(textCommandHandler.getCommandInfo().name(), textCommandHandler);
+        if (!commandGroupMap.containsKey(textCommandHandler.getGroup())) {
+            commandGroupMap.put(textCommandHandler.getGroup(), List.of(textCommandHandler));
+        } else {
+            commandGroupMap.get(textCommandHandler.getGroup()).add(textCommandHandler);
+        }
     }
 
     public TextCommandHandler getTextCommand(String name) {
-        return textCommandHandlers.get(name);
+        return commands.get(name);
     }
 
     private Consumer<GuildMessageReceivedEvent> unknownCommandAction;

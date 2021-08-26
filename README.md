@@ -5,8 +5,7 @@
 
 # How to use it?
 
-[![](https://jitpack.io/v/GodlyCoder07/CommandFramework.svg)](https://jitpack.io/#GodlyCoder07/CommandFramework)
-
+[![](https://jitpack.io/v/Centauri07/DiscordCommandFramework.svg)](https://jitpack.io/#Centauri07/DiscordCommandFramework)
 
 ```xml
 <repository>
