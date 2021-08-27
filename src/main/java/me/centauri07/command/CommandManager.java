@@ -50,7 +50,8 @@ public class CommandManager extends ListenerAdapter {
         }
         commands.put(textCommandHandler.getCommandInfo().name(), textCommandHandler);
         if (!commandGroupMap.containsKey(textCommandHandler.getGroup())) {
-            commandGroupMap.put(textCommandHandler.getGroup(), List.of(textCommandHandler));
+            commandGroupMap.put(textCommandHandler.getGroup(), new ArrayList<>());
+            commandGroupMap.get(textCommandHandler.getGroup()).add(textCommandHandler);
         } else {
             commandGroupMap.get(textCommandHandler.getGroup()).add(textCommandHandler);
         }
