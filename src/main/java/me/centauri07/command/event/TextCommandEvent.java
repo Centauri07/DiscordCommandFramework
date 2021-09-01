@@ -2,6 +2,7 @@ package me.centauri07.command.event;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import me.centauri07.command.text.TextCommandHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -16,10 +17,11 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class TextCommandEvent {
     private final GuildMessageReceivedEvent event;
-    @Getter final TextCommandHandler command;
 
-    @Getter
-    private final String[] args;
+    @Getter private final TextCommandHandler command;
+    @Getter private final String[] args;
+    @Setter
+    @Getter private long delay;
 
     public JDA getJDA() {
         return event.getJDA();

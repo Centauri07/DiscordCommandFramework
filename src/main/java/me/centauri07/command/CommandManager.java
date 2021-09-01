@@ -51,10 +51,9 @@ public class CommandManager extends ListenerAdapter {
         commands.put(textCommandHandler.getCommandInfo().name(), textCommandHandler);
         if (!commandGroupMap.containsKey(textCommandHandler.getGroup())) {
             commandGroupMap.put(textCommandHandler.getGroup(), new ArrayList<>());
-            commandGroupMap.get(textCommandHandler.getGroup()).add(textCommandHandler);
-        } else {
-            commandGroupMap.get(textCommandHandler.getGroup()).add(textCommandHandler);
         }
+        commandGroupMap.get(textCommandHandler.getGroup()).add(textCommandHandler);
+
     }
 
     public TextCommandHandler getTextCommand(String name) {
@@ -69,6 +68,7 @@ public class CommandManager extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
+        long delayStart = System.currentTimeMillis();
         if (event.getMessage().getContentRaw().startsWith(prefix)) {
             String[] message = event.getMessage().getContentRaw().split(" ");
 
@@ -98,13 +98,15 @@ public class CommandManager extends ListenerAdapter {
                             e.printStackTrace();
                         }
                     }
-
+                    commandEvent.setDelay(System.currentTimeMillis() - delayStart);
                     return;
                 }
             }
 
-            if (validateRole(commandEvent) && validateChannel(commandEvent) && validatePermission(commandEvent) && validateArguments(commandEvent))
+            if (validateRole(commandEvent) && validateChannel(commandEvent) && validatePermission(commandEvent) && validateArguments(commandEvent)) {
                 command.perform(commandEvent);
+                commandEvent.setDelay(System.currentTimeMillis() - delayStart);
+            }
         }
     }
 
