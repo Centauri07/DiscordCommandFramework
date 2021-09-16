@@ -18,7 +18,7 @@ public class TextSubCommandHandler {
     @Getter private final Method method;
 
     @Getter
-    private final TextSubCommand textSubCommandInfo;
+    private final TextSubCommand textSubCommand;
     @Getter private List<Permission> permissions = new ArrayList<>();
     @Getter private List<String> aliases = new ArrayList<>();
     @Getter private List<String> roles = new ArrayList<>();
@@ -28,11 +28,15 @@ public class TextSubCommandHandler {
     @Nullable @Getter
     private final RequiredArgsRange requiredArgsRange;
 
+    @Getter private final String name;
+
     public TextSubCommandHandler(Method method) {
         this.method = method;
 
-        textSubCommandInfo = method.getDeclaredAnnotation(TextSubCommand.class);
-        Objects.requireNonNull(textSubCommandInfo, "Handler cannot be null");
+        name = method.getName();
+
+        textSubCommand = method.getDeclaredAnnotation(TextSubCommand.class);
+        Objects.requireNonNull(textSubCommand, "Handler cannot be null");
 
         @Nullable me.centauri07.command.attributes.Permission permission = getClass().getDeclaredAnnotation(me.centauri07.command.attributes.Permission.class);
         if (permission != null) permissions = Arrays.asList(permission.permissions());

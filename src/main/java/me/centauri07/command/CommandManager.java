@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 
 public class CommandManager extends ListenerAdapter {
     @Getter
-    private final Map<String, TextCommandHandler> commands = new HashMap<>();
+    private final List<TextCommandHandler> commands = new ArrayList<>();
 
     @Getter
     private final Map<String, List<TextCommandHandler>> commandGroupMap = new HashMap<>();
@@ -41,23 +41,18 @@ public class CommandManager extends ListenerAdapter {
     }
 
     public void registerTextCommand(TextCommandHandler textCommandHandler) {
-        if (commands.get(textCommandHandler.getCommandInfo().name()) != null) {
+        if (getTextCommand(textCommandHandler.getName()) != null) {
             try {
-                throw new TextCommandAlreadyExistsException("Command with name " + textCommandHandler.getCommandInfo().name() + " already exists");
+                throw new TextCommandAlreadyExistsException("Command with name " + textCommandHandler.getName() + " already exists");
             } catch (TextCommandAlreadyExistsException e) {
                 e.printStackTrace();
             }
         }
-        commands.put(textCommandHandler.getCommandInfo().name(), textCommandHandler);
-        if (!commandGroupMap.containsKey(textCommandHandler.getGroup())) {
-            commandGroupMap.put(textCommandHandler.getGroup(), new ArrayList<>());
-        }
-        commandGroupMap.get(textCommandHandler.getGroup()).add(textCommandHandler);
-
+        commands.add(textCommandHandler);
     }
 
     public TextCommandHandler getTextCommand(String name) {
-        return commands.get(name);
+        return commands.stream().filter(command -> command.getName().equals(name) || command.getAliases().contains(name)).findFirst().orElse(null);
     }
 
     private Consumer<GuildMessageReceivedEvent> unknownCommandAction;
@@ -68,15 +63,13 @@ public class CommandManager extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
-        long delayStart = System.currentTimeMillis();
         if (event.getMessage().getContentRaw().startsWith(prefix)) {
             String[] message = event.getMessage().getContentRaw().split(" ");
 
             TextCommandHandler command = getTextCommand(message[0].replace(prefix, ""));
 
             if (command == null) {
-                if (unknownCommandAction == null) return;
-                unknownCommandAction.accept(event);
+                if (unknownCommandAction != null) unknownCommandAction.accept(event);
                 return;
             }
 
@@ -98,14 +91,12 @@ public class CommandManager extends ListenerAdapter {
                             e.printStackTrace();
                         }
                     }
-                    commandEvent.setDelay(System.currentTimeMillis() - delayStart);
                     return;
                 }
             }
 
             if (validateRole(commandEvent) && validateChannel(commandEvent) && validatePermission(commandEvent) && validateArguments(commandEvent)) {
                 command.perform(commandEvent);
-                commandEvent.setDelay(System.currentTimeMillis() - delayStart);
             }
         }
     }
@@ -116,19 +107,19 @@ public class CommandManager extends ListenerAdapter {
     }
 
     private boolean validateChannel(TextCommandEvent event) {
-        if (event.getCommand().getAllowedChannels().isEmpty()) return true;
+        if (event.getCommand().getChannels().isEmpty()) return true;
 
-        if (event.getCommand().getAllowedChannels().contains(event.getChannel().getId())) return true;
+        if (event.getCommand().getChannels().contains(event.getChannel().getId())) return true;
 
         event.getCommand().onWrongChannel(event);
         return false;
     }
 
     private boolean validateRole(TextCommandEvent event) {
-        if (event.getCommand().getAllowedRoles().isEmpty()) return true;
+        if (event.getCommand().getRoles().isEmpty()) return true;
 
         List<Role> roles = new ArrayList<>();
-        for (String roleId : event.getCommand().getAllowedRoles()) {
+        for (String roleId : event.getCommand().getRoles()) {
             Role role = event.getGuild().getRoleById(roleId);
             if (role != null)
                 roles.add(role);
@@ -157,32 +148,8 @@ public class CommandManager extends ListenerAdapter {
     }
 
     private boolean validateArguments(TextCommandEvent event) {
-        if (event.getCommand().getRequiredArgsRange() == null && event.getCommand().getRequiredArgs() == null) return true;
-
-        if (event.getCommand().getRequiredArgsRange() != null) {
-            if (event.getCommand().getRequiredArgsRange().lowerBound() > event.getCommand().getRequiredArgsRange().upperBound()) {
-                try {
-                    throw new IllegalArgumentCountException("Upper bound can't be more than Lower bound!");
-                } catch (IllegalArgumentCountException e) {
-                    e.printStackTrace();
-                }
-                return false;
-            }
-
-            if (event.getCommand().getRequiredArgsRange().lowerBound() < 0) {
-                try {
-                    throw new IllegalArgumentCountException("Lower bound can't be less than 0");
-                } catch (IllegalArgumentCountException e) {
-                    e.printStackTrace();
-                }
-                return false;
-            }
-
-            if (event.getArgs().length >= event.getCommand().getRequiredArgsRange().lowerBound() && event.getArgs().length <= event.getCommand().getRequiredArgsRange().upperBound())
-                return true;
-
-        } else if (event.getCommand().getRequiredArgs() != null && event.getArgs().length == event.getCommand().getRequiredArgs().requiredArguments()) {
-            if (event.getCommand().getRequiredArgs().requiredArguments() < 0) {
+        if (event.getArgs().length == event.getCommand().getRequiredArgsSize()) {
+            if (event.getCommand().getRequiredArgsSize() < 0) {
                 try {
                     throw new IllegalArgumentCountException("Required argument count cannot be less than 0");
                 } catch (IllegalArgumentCountException e) {
@@ -239,9 +206,9 @@ public class CommandManager extends ListenerAdapter {
     }
 
     private boolean validatePermission(TextCommandEvent event) {
-        if (event.getCommand().getPermissions().isEmpty()) return true;
+        if (event.getCommand().getPermission().isEmpty()) return true;
 
-        if (hasPermission(event.getCommand().getPermissions(), event.getMember())) return true;
+        if (hasPermission(event.getCommand().getPermission(), event.getMember())) return true;
 
         event.getCommand().onNoPermission(event);
         return false;

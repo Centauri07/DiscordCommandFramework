@@ -20,10 +20,10 @@ public class ReflectionUtil {
             for (Method method : clazz.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(TextSubCommand.class)) {
                     TextSubCommandHandler subCommand = new TextSubCommandHandler(method);
-                    if (subCommands.get(subCommand.getTextSubCommandInfo().name()) != null) {
-                        throw new TextSubCommandAlreadyExistsException("Command with name " + subCommand.getTextSubCommandInfo().name() + " already exists");
+                    if (subCommands.get(subCommand.getTextSubCommand().name()) != null) {
+                        throw new TextSubCommandAlreadyExistsException("Command with name " + subCommand.getTextSubCommand().name() + " already exists");
                     }
-                    subCommands.put(subCommand.getTextSubCommandInfo().name(), subCommand);
+                    subCommands.put(subCommand.getTextSubCommand().name(), subCommand);
                 }
             }
             clazz = clazz.getSuperclass();
