@@ -46,54 +46,50 @@ public class DiscordBot {
 # Making a text command
 
 ```java
-@Aliases(aliases = "hi") /* <- Not Required */
-@AllowedChannels(channels = "Channel IDs") /* <- Not Required */
-@AllowedRoles(roles = "Roles IDs") /* <- Not Required */
-@Permission(permissions = {net.dv8tion.jda.api.Permission.ADMINISTRATOR}) /* <- Not Required */
-@RequiredArgs(requiredArguments = 0) /* <- Not Required */
-@CommandInformation(name = "hello", description = "says hello to you", usage = "")
 public class HelloCommand extends TextCommandHandler {
     @Override
     public void perform(@NotNull TextCommandEvent event) {
-        event.reply("Hello!", Color.GREEN);
+        event.reply("Test success", Color.GREEN);
     }
 
-    @Aliases(aliases = "hi") /* <- Not Required */
-    @AllowedRoles(roles = "Roles IDs") /* <- Not Required */
-    @Permission(permissions = {net.dv8tion.jda.api.Permission.ADMINISTRATOR}) /* <- Not Required */
-    @RequiredArgs(requiredArguments = 0) /* <- Not Required */
-    @TextSubCommand(name = "test")
-    public void test(TextSubCommandEvent event) {
-        event.replyAndDelete("Hello there, you use the subcommand `" + event.getSubCommand().getTextSubCommandInfo().name() + "`", Color.GREEN);
+    @TextSubCommand(name = "hello")
+    public void hello(TextSubCommandEvent event) {
+        event.reply("Hi", Color.GREEN);
     }
 
-    @Aliases(aliases = "hi") /* <- Not Required */
-    @AllowedRoles(roles = "Roles IDs") /* <- Not Required */
-    @Permission(permissions = {net.dv8tion.jda.api.Permission.ADMINISTRATOR}) /* <- Not Required */
-    @RequiredArgs(requiredArguments = 0) /* <- Not Required */
-    @TextSubCommand(name = "test2")
-    public void test2(TextSubCommandEvent event) {
-        event.replyAndDelete("Hello there, you use the subcommand `" + event.getSubCommand().getTextSubCommandInfo().name() + "`", Color.GREEN);
+    @Override
+    public @NotNull String getName() {
+        return "test";
     }
 
-    @Override /* Not Required */
-    public void onNoPermission(@NotNull TextCommandEvent event) {
-        event.replyAndDelete("You don't have the permission to execute this command." , Color.RED);
+    @Override
+    public @NotNull String getDescription() {
+        return "test command";
     }
 
-    @Override /* Not Required */
-    public void onNoRole(@NotNull TextCommandEvent event) {
-        event.replyAndDelete("You don't have the role to execute this command.", Color.RED);
+    @Override
+    public @NotNull List<String> getAliases() {
+        return Collections.emptyList();
     }
 
-    @Override /* Not Required */
-    public void onWrongChannel(@NotNull TextCommandEvent event) {
-        event.replyAndDelete("You can't use that command in + " + event.getChannel().getAsMention(), Color.RED);
+    @Override
+    public @NotNull List<Permission> getPermission() {
+        return Collections.emptyList();
     }
 
-    @Override /* Not Required */
-    public void onWrongUsage(@NotNull TextCommandEvent event) {
-        event.replyAndDelete("Usage: " + CommandManager.getPrefix() + getCommandInfo().usage(), Color.RED);
+    @Override
+    public @NotNull List<String> getChannels() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public @NotNull List<String> getRoles() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int getRequiredArgsSize() {
+        return 0;
     }
 }
 ```
